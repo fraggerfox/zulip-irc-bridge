@@ -90,22 +90,24 @@ bind channel ↔ stream+topic, each with a `direction` of `both`,
 
 ### Phase 6 — scratch-channel test + deployment
 
-Stage A — live smoke test, run locally (no deploy):
-- [ ] join `##badnicks-test` on Libera (create-on-join; first joiner
+Stage A — live smoke test, run locally (no deploy) — PASSED 2026-09-04:
+- [x] join `##badnicks-test` on Libera (create-on-join; first joiner
       gets ops, needed for the kick test)
-- [ ] test mapping reuses the existing `irc-badnicks` stream under a
-      separate topic (`bridge test`) — no new stream, bot already
-      subscribed, no collision with production traffic
-- [ ] run `go run ./cmd/zulip-irc-bridge -config config.toml` from the
+- [x] test mapping uses the existing `irc-badnicks` stream. NOTE: the
+      stream restricts posting to the single topic `general chat`
+      (Zulip-side setting), so the mapping must use that topic — a
+      separate test topic gets HTTP 400. Scratch isolation comes from
+      the channel, not the topic.
+- [x] run `go run ./cmd/zulip-irc-bridge -config config.toml` from the
       dev machine with the bot's API key in a local secret file
-- [ ] test matrix: IRC→Zulip, Zulip→IRC, `/me` both directions,
-      multiline + truncation cap, DM to bot ignored, kick → rejoin,
-      SIGINT → clean QUIT in channel
+- [x] test matrix: IRC→Zulip, Zulip→IRC, `/me` both directions,
+      multiline + truncation cap, DM to bot ignored, kick → rejoin
+      (~6s), SIGINT → clean QUIT in channel; 8 forwarded / 0 dropped
 - [ ] optional: register a NickServ account for the bot and verify
       SASL PLAIN over TLS (hard-fail path: wrong password must abort)
 
 Stage B — same scratch mapping, deployed:
-- [ ] flake `nixosModules.default`: systemd unit (Type=notify,
+- [x] flake `nixosModules.default`: systemd unit (Type=notify,
       DynamicUser, LoadCredential secrets, conservative Restart
       defaults)
 - [ ] deploy to bessie bridging `##badnicks-test`; verify under
