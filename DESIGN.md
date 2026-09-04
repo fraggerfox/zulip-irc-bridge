@@ -88,11 +88,35 @@ bind channel ↔ stream+topic, each with a `direction` of `both`,
 - [x] optional sd_notify (Type=notify) support
 - [x] `go test -cover` pass; race detector (`go test -race`) clean
 
-### Phase 6 — deployment
-- [ ] flake `nixosModules.default`: systemd unit, DynamicUser,
-      LoadCredential secrets, conservative Restart defaults
-- [ ] serverconf: replace modules/zulip-irc (fetchFromGitHub + patch)
-      with this flake's module
+### Phase 6 — scratch-channel test + deployment
+
+Stage A — live smoke test, run locally (no deploy):
+- [ ] join `##badnicks-test` on Libera (create-on-join; first joiner
+      gets ops, needed for the kick test)
+- [ ] test mapping reuses the existing `irc-badnicks` stream under a
+      separate topic (`bridge test`) — no new stream, bot already
+      subscribed, no collision with production traffic
+- [ ] run `go run ./cmd/zulip-irc-bridge -config config.toml` from the
+      dev machine with the bot's API key in a local secret file
+- [ ] test matrix: IRC→Zulip, Zulip→IRC, `/me` both directions,
+      multiline + truncation cap, DM to bot ignored, kick → rejoin,
+      SIGINT → clean QUIT in channel
+- [ ] optional: register a NickServ account for the bot and verify
+      SASL PLAIN over TLS (hard-fail path: wrong password must abort)
+
+Stage B — same scratch mapping, deployed:
+- [ ] flake `nixosModules.default`: systemd unit (Type=notify,
+      DynamicUser, LoadCredential secrets, conservative Restart
+      defaults)
+- [ ] deploy to bessie bridging `##badnicks-test`; verify under
+      systemd: credentials, sd_notify readiness, restart pacing,
+      journal legibility
+
+Stage C — cutover:
+- [ ] flip the mapping to `##badnicks` / "general chat"
+- [ ] serverconf: remove modules/zulip-irc (fetchFromGitHub + patch +
+      python env); this flake's module replaces it
+- [ ] retire the scratch channel
 
 ## Testing policy
 
