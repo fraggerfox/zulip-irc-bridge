@@ -106,19 +106,29 @@ Stage A — live smoke test, run locally (no deploy) — PASSED 2026-09-04:
 - [ ] optional: register a NickServ account for the bot and verify
       SASL PLAIN over TLS (hard-fail path: wrong password must abort)
 
-Stage B — same scratch mapping, deployed:
+Stage B — same scratch mapping, deployed — PASSED 2026-09-04:
 - [x] flake `nixosModules.default`: systemd unit (Type=notify,
       DynamicUser, LoadCredential secrets, conservative Restart
       defaults)
-- [ ] deploy to bessie bridging `##badnicks-test`; verify under
-      systemd: credentials, sd_notify readiness, restart pacing,
-      journal legibility
+- [x] deploy to bessie bridging `##badnicks-test`; verified under
+      systemd: ExecStartPre config check gates the start, credential
+      delivered via LoadCredential, READY only after the actual IRC
+      connect (Starting 10:19:08 -> Started 10:19:14, exactly at
+      "irc connected"), two-way relay clean, 0 errors / 0 restarts.
+      Connected over TLS 6697 via IPv6.
 
-Stage C — cutover:
-- [ ] flip the mapping to `##badnicks` / "general chat"
-- [ ] serverconf: remove modules/zulip-irc (fetchFromGitHub + patch +
-      python env); this flake's module replaces it
-- [ ] retire the scratch channel
+Stage C — cutover — DONE 2026-09-04:
+- [x] flip the mapping to `##badnicks` / "general chat"
+- [x] serverconf: modules/zulip-irc rewritten to pure configuration of
+      this flake's module (fetchFromGitHub + patch + python env + the
+      hand-rolled unit all deleted; API key moved from argv to
+      LoadCredential)
+- [x] retire the scratch channel
+
+Post-deployment (optional hardening):
+- [ ] register a NickServ account for the bot and enable [irc.sasl]
+      (SASL-authenticated connections are exempt from most Libera
+      range bans — the failure class that took down the old bridge)
 
 ## Testing policy
 
