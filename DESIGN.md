@@ -52,41 +52,41 @@ bind channel ↔ stream+topic, each with a `direction` of `both`,
       `-check` mode; table tests
 - [x] flake.nix: buildGoModule package + devshell
 
-### Phase 2 — Zulip client (internal/zulip)
-- [ ] minimal REST client: SendMessage, RegisterQueue, GetEvents
+### Phase 2 — Zulip client (internal/zulip) (done)
+- [x] minimal REST client: SendMessage, RegisterQueue, GetEvents
       (long-poll), DeleteQueue; Basic auth; own http.Client per instance
-- [ ] event loop handling: heartbeats, `BAD_EVENT_QUEUE_ID` →
+- [x] event loop handling: heartbeats, `BAD_EVENT_QUEUE_ID` →
       re-register, backoff on transport errors
-- [ ] send retries: bounded attempts with backoff; give up + log per
+- [x] send retries: bounded attempts with backoff; give up + log per
       message, never crash the loop
-- [ ] tests against httptest.Server: auth header, retry behavior,
+- [x] tests against httptest.Server: auth header, retry behavior,
       queue re-registration, long-poll timeout handling
 
-### Phase 3 — IRC client (internal/ircx)
-- [ ] ergochat/irc-go connection: TLS (default, port 6697), SASL PLAIN
+### Phase 3 — IRC client (internal/ircx) (done)
+- [x] ergochat/irc-go connection: TLS (default, port 6697), SASL PLAIN
       with independent username/password, hard-fail if SASL enabled but
       rejected (no silent plaintext-auth fallback)
-- [ ] multi-channel join from mappings; rejoin on kick; reconnect with
+- [x] multi-channel join from mappings; rejoin on kick; reconnect with
       ≥30s steady-state backoff (the Libera ban lesson)
-- [ ] nick-in-use fallback (suffix underscore); no forced `_zulip` suffix
-- [ ] tests for the pure parts (nick fallback, channel set derivation);
+- [x] nick-in-use fallback (suffix underscore); no forced `_zulip` suffix
+- [x] tests for the pure parts (nick fallback, channel set derivation);
       connection behavior isolated behind a small interface
 
-### Phase 4 — router (internal/router)
-- [ ] mapping resolution both directions, per-mapping direction filter
-- [ ] loop prevention: own bot email, own nick, `ignore_nicks`
-- [ ] formatting: configurable templates ({nick}/{name}/{content});
+### Phase 4 — router (internal/router) (done)
+- [x] mapping resolution both directions, per-mapping direction filter
+- [x] loop prevention: own bot email, own nick, `ignore_nicks`
+- [x] formatting: configurable templates ({nick}/{name}/{content});
       IRC ACTION (/me) → italics and vice versa; multiline Zulip
       messages → one IRC line each, capped with a truncation notice
-- [ ] full table-test coverage — this is the critical pure component
+- [x] full table-test coverage — this is the critical pure component
 
-### Phase 5 — bridge core + ops (internal/bridge)
-- [ ] Run(ctx, cfg): wire goroutines and channels; supervise; restart
+### Phase 5 — bridge core + ops (internal/bridge) (done)
+- [x] Run(ctx, cfg): wire goroutines and channels; supervise; restart
       failed legs with backoff
-- [ ] periodic per-direction counters (forwarded / dropped) to the log
-- [ ] clean shutdown: QUIT with message, drain, exit code semantics
-- [ ] optional sd_notify (Type=notify) support
-- [ ] `go test -cover` pass; race detector (`go test -race`) clean
+- [x] periodic per-direction counters (forwarded / dropped) to the log
+- [x] clean shutdown: QUIT with message, drain, exit code semantics
+- [x] optional sd_notify (Type=notify) support
+- [x] `go test -cover` pass; race detector (`go test -race`) clean
 
 ### Phase 6 — deployment
 - [ ] flake `nixosModules.default`: systemd unit, DynamicUser,
