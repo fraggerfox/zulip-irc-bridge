@@ -28,6 +28,7 @@
 
           meta = {
             description = "Two-way bridge between Zulip streams and IRC channels";
+            license = pkgs.lib.licenses.bsd2;
             mainProgram = "zulip-irc-bridge";
           };
         };
