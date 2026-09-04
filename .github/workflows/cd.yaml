@@ -1,0 +1,26 @@
+name: CD
+
+# release-please watches Conventional Commits on main and maintains a
+# standing "release PR" that bumps the version + CHANGELOG. Merging that
+# PR tags the release (vX.Y.Z) and creates the GitHub Release. Only
+# feat:/fix:/breaking commits trigger a release; docs/ci/test/chore etc.
+# ride along in the changelog. Tag-only for now — add a build/publish
+# job gated on `steps.release.outputs.release_created` when packaging.
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: googleapis/release-please-action@v5.0.0
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
