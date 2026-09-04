@@ -46,3 +46,7 @@ nix develop     # go toolchain + tooling
 go test -race -cover ./...
 go run ./cmd/zulip-irc-bridge -config config.toml -check
 ```
+
+## License
+
+[BSD 2-Clause](LICENSE)
