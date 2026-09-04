@@ -3,12 +3,16 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"log/slog"
 	"os"
+	"os/signal"
 	"strings"
+	"syscall"
 
+	"github.com/fraggerfox/zulip-irc-bridge/internal/bridge"
 	"github.com/fraggerfox/zulip-irc-bridge/internal/config"
 )
 
@@ -45,13 +49,19 @@ func run() int {
 		return 0
 	}
 
-	slog.SetDefault(slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{
+	log := slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{
 		Level: logLevel(cfg.Bridge.LogLevel),
-	})))
+	}))
+	slog.SetDefault(log)
 
-	// Bridge core arrives in later phases (see DESIGN.md).
-	slog.Error("bridge core not implemented yet — see DESIGN.md")
-	return 1
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer stop()
+
+	if err := bridge.Run(ctx, cfg, log); err != nil {
+		log.Error("bridge failed", "err", err)
+		return 1
+	}
+	return 0
 }
 
 func logLevel(s string) slog.Level {
