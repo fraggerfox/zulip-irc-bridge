@@ -63,9 +63,11 @@ func TestLoadMinimalAppliesDefaults(t *testing.T) {
 func TestSecretFileWinsOverInline(t *testing.T) {
 	dir := t.TempDir()
 	keyFile := write(t, dir, "key", "file-key\n")
+	// TOML literal string (single quotes): Windows paths contain
+	// backslashes, which double-quoted TOML strings treat as escapes.
 	cfg := strings.Replace(minimalTOML,
 		`api_key = "inline-key"`,
-		"api_key = \"inline-key\"\napi_key_file = \""+keyFile+"\"", 1)
+		"api_key = \"inline-key\"\napi_key_file = '"+keyFile+"'", 1)
 	p := write(t, dir, "c.toml", cfg)
 
 	c, err := Load(p)

@@ -7,6 +7,7 @@ import (
 	"net"
 	"os"
 	"path/filepath"
+	"runtime"
 	"sync"
 	"testing"
 	"time"
@@ -123,6 +124,9 @@ func TestLogStatsTicks(t *testing.T) {
 }
 
 func TestNotifyReadySendsDatagram(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("no AF_UNIX datagram sockets on windows")
+	}
 	dir := t.TempDir()
 	sock := filepath.Join(dir, "notify.sock")
 	addr, err := net.ResolveUnixAddr("unixgram", sock)

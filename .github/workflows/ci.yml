@@ -1,0 +1,71 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+      # golangci-lint v2 `run` also reports formatter (gofumpt/goimports)
+      # violations as issues, so this single step covers lint + fmt.
+      # Config lives in .golangci.yml.
+      - uses: golangci/golangci-lint-action@v9
+        with:
+          version: v2.12.2
+
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        # the pipefail/tee steps below assume bash; Windows defaults to pwsh
+        shell: bash
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+      - name: go test with race detector and coverage
+        run: |
+          set -o pipefail
+          go test -race -coverprofile=coverage.out -covermode=atomic ./... | tee gotest.log
+      - name: coverage summary
+        if: always()
+        run: |
+          {
+            echo '## Coverage (${{ matrix.os }})'
+            echo '```'
+            grep -E 'ok|FAIL|coverage' gotest.log || true
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: render coverage report
+        if: always()
+        run: go tool cover -html=coverage.out -o coverage.html
+      - name: upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: coverage-report-${{ matrix.os }}
+          path: |
+            coverage.out
+            coverage.html
+
+  nix:
+    # The production deployment path is the flake package (NixOS module
+    # on bessie), so a broken nix build is a broken release.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: cachix/install-nix-action@v31
+      - run: nix build .
+      - run: nix run . -- -version

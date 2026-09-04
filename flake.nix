@@ -21,12 +21,10 @@
       {
         packages.default = pkgs.buildGoModule.override { go = go; } {
           pname = "zulip-irc-bridge";
-          version = "0.1.0";
+          version = "0.1.0"; # x-release-please-version
           src = ./.;
 
-          # Update with the value nix prints on first build whenever
-          # go.mod dependencies change.
-          vendorHash = pkgs.lib.fakeHash;
+          vendorHash = "sha256-oGc1Zx+FSQOj+bFSX0nEjpuNgzlhe9bu/bSRP5FNp7U=";
 
           meta = {
             description = "Two-way bridge between Zulip streams and IRC channels";
