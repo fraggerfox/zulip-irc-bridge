@@ -1,0 +1,45 @@
+# golangci-lint v2 configuration.
+#
+# Linter selection follows the common denominator of large Go projects
+# (kubernetes, prometheus, grafana): the standard set (errcheck, govet,
+# ineffassign, staticcheck, unused) plus widely-adopted extras, leaning
+# on checks that matter for a long-running network daemon.
+version: "2"
+
+linters:
+  default: standard
+  enable:
+    - bodyclose    # unclosed HTTP response bodies (zulip client)
+    - copyloopvar  # pre-1.22 loop-var captures that are now footguns
+    - errorlint    # errors.Is/As instead of == and type asserts
+    - gocritic     # opinionated correctness + perf diagnostics
+    - gosec        # security: TLS settings, file perms, injection
+    - misspell
+    - noctx        # HTTP requests without context (long-poll client)
+    - nolintlint   # nolint directives must be scoped and explained
+    - revive       # style successor of golint
+    - unconvert
+    - unparam
+    - whitespace
+  settings:
+    gocritic:
+      disabled-checks:
+        - ifElseChain # sometimes clearer than switch
+    revive:
+      rules:
+        - name: package-comments
+          disabled: true # package docs enforced by convention, not lint
+  exclusions:
+    rules:
+      # Tests trade rigor for brevity deliberately.
+      - path: _test\.go
+        linters:
+          - gosec
+          - noctx
+          - bodyclose
+          - errcheck
+
+formatters:
+  enable:
+    - gofumpt
+    - goimports

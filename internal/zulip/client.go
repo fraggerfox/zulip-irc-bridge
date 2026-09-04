@@ -69,7 +69,7 @@ func (c *Client) call(ctx context.Context, method, path string, params url.Value
 	if err != nil {
 		return err
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	raw, err := io.ReadAll(io.LimitReader(resp.Body, 8<<20))
 	if err != nil {

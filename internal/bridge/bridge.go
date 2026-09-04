@@ -275,11 +275,14 @@ func notifyReady(log *slog.Logger) {
 	if sock == "" {
 		return
 	}
-	conn, err := net.Dial("unixgram", sock)
+	// The socket path comes from systemd's NOTIFY_SOCKET contract.
+	conn, err := net.Dial("unixgram", sock) //nolint:gosec,noctx // local fire-and-forget datagram; path is trusted per sd_notify(3)
 	if err != nil {
 		log.Warn("sd_notify failed", "err", err)
 		return
 	}
-	defer conn.Close()
-	conn.Write([]byte("READY=1"))
+	defer func() { _ = conn.Close() }()
+	if _, err := conn.Write([]byte("READY=1")); err != nil {
+		log.Warn("sd_notify write failed", "err", err)
+	}
 }

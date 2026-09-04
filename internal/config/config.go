@@ -41,9 +41,9 @@ type IRC struct {
 type Direction string
 
 const (
-	Both        Direction = "both"
-	IRCToZulip  Direction = "irc_to_zulip"
-	ZulipToIRC  Direction = "zulip_to_irc"
+	Both       Direction = "both"
+	IRCToZulip Direction = "irc_to_zulip"
+	ZulipToIRC Direction = "zulip_to_irc"
 )
 
 type Mapping struct {
@@ -75,7 +75,7 @@ func (i IRC) TLSEnabled() bool {
 
 func readSecret(inline, file, what string) (string, error) {
 	if file != "" {
-		b, err := os.ReadFile(file)
+		b, err := os.ReadFile(file) //nolint:gosec // secret path is operator-provided config
 		if err != nil {
 			return "", fmt.Errorf("reading %s from %s: %w", what, file, err)
 		}
@@ -89,7 +89,7 @@ func readSecret(inline, file, what string) (string, error) {
 
 // Load reads, resolves secrets for, and validates the config at path.
 func Load(path string) (*Config, error) {
-	b, err := os.ReadFile(path)
+	b, err := os.ReadFile(path) //nolint:gosec // config path comes from the -config flag
 	if err != nil {
 		return nil, fmt.Errorf("reading config: %w", err)
 	}

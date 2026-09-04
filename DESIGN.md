@@ -47,7 +47,7 @@ bind channel ↔ stream+topic, each with a `direction` of `both`,
 ## Phases
 
 ### Phase 1 — scaffold (done)
-- [x] go.mod (go 1.26 directive, 1.27rc toolchain via flake), cmd/ layout
+- [x] go.mod + flake pinned to go 1.26 (stable; matches golangci-lint), cmd/ layout
 - [x] internal/config: TOML loader, `*_file` secrets, validation,
       `-check` mode; table tests
 - [x] flake.nix: buildGoModule package + devshell

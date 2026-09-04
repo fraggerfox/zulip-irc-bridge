@@ -16,7 +16,7 @@
       system:
       let
         pkgs = nixpkgs.legacyPackages.${system};
-        go = pkgs.go_1_27;
+        go = pkgs.go; # 1.26.x — matches go.mod directive and golangci-lint build
       in
       {
         packages.default = pkgs.buildGoModule.override { go = go; } {
@@ -40,6 +40,7 @@
             pkgs.gopls
             pkgs.gotools
             pkgs.go-tools # staticcheck
+            pkgs.golangci-lint
           ];
         };
       }

@@ -43,15 +43,15 @@ func NickOf(source string) string {
 // given channels and delivers inbound channel messages to onMessage.
 func New(cfg config.IRC, channels []string, onMessage InboundHandler, log *slog.Logger) *Client {
 	conn := &ircevent.Connection{
-		Server:       fmt.Sprintf("%s:%d", cfg.Server, cfg.Port),
-		Nick:         cfg.Nick,
-		User:         cfg.Nick,
-		RealName:     cfg.Realname,
-		UseTLS:       cfg.TLSEnabled(),
-		QuitMessage:  "bridge shutting down",
+		Server:        fmt.Sprintf("%s:%d", cfg.Server, cfg.Port),
+		Nick:          cfg.Nick,
+		User:          cfg.Nick,
+		RealName:      cfg.Realname,
+		UseTLS:        cfg.TLSEnabled(),
+		QuitMessage:   "bridge shutting down",
 		ReconnectFreq: 30 * time.Second,
-		KeepAlive:    2 * time.Minute,
-		Timeout:      30 * time.Second,
+		KeepAlive:     2 * time.Minute,
+		Timeout:       30 * time.Second,
 	}
 	if cfg.TLSEnabled() {
 		conn.TLSConfig = &tls.Config{ServerName: cfg.Server}
@@ -69,14 +69,20 @@ func New(cfg config.IRC, channels []string, onMessage InboundHandler, log *slog.
 	conn.AddConnectCallback(func(e ircmsg.Message) {
 		log.Info("irc connected", "server", conn.Server, "nick", conn.CurrentNick())
 		for _, ch := range channels {
-			conn.Join(ch)
+			if err := conn.Join(ch); err != nil {
+				log.Error("join failed", "channel", ch, "err", err)
+			}
 		}
 	})
 	conn.AddCallback("KICK", func(e ircmsg.Message) {
 		if len(e.Params) >= 2 && e.Params[1] == conn.CurrentNick() {
 			ch := e.Params[0]
 			log.Warn("kicked from channel, rejoining", "channel", ch)
-			time.AfterFunc(rejoinDelay, func() { conn.Join(ch) })
+			time.AfterFunc(rejoinDelay, func() {
+				if err := conn.Join(ch); err != nil {
+					log.Error("rejoin failed", "channel", ch, "err", err)
+				}
+			})
 		}
 	})
 	conn.AddCallback("PRIVMSG", func(e ircmsg.Message) {

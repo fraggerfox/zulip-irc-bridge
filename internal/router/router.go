@@ -85,7 +85,7 @@ func (r *Router) FromIRC(channel, nick, content string, isAction bool, ownNick s
 	if !ok || m.Direction == config.ZulipToIRC {
 		return ToZulip{}, false
 	}
-	body := content
+	var body string
 	if isAction {
 		body = "*" + nick + " " + content + "*"
 	} else {
