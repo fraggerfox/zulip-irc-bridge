@@ -172,10 +172,14 @@ func pumpToIRC(ctx context.Context, ch <-chan router.ToIRC, w ircWriter, c *Coun
 	}
 }
 
+// pollBackoffBase is the initial poll-failure backoff; a variable so
+// tests can shorten it.
+var pollBackoffBase = 5 * time.Second
+
 // pollZulip long-polls the Zulip event queue, re-registering when the
 // queue expires and backing off on transport errors.
 func pollZulip(ctx context.Context, p zulipPoller, r *router.Router, toIRC chan<- router.ToIRC, c *Counters, log *slog.Logger) {
-	backoff := 5 * time.Second
+	backoff := pollBackoffBase
 	const maxBackoff = 5 * time.Minute
 
 	var queue *zulip.Queue
@@ -197,7 +201,7 @@ func pollZulip(ctx context.Context, p zulipPoller, r *router.Router, toIRC chan<
 				continue
 			}
 			queue = &q
-			backoff = 5 * time.Second
+			backoff = pollBackoffBase
 			log.Info("zulip event queue registered", "queue", q.ID)
 		}
 
@@ -218,7 +222,7 @@ func pollZulip(ctx context.Context, p zulipPoller, r *router.Router, toIRC chan<
 			backoff = min(backoff*2, maxBackoff)
 			continue
 		}
-		backoff = 5 * time.Second
+		backoff = pollBackoffBase
 
 		for _, msg := range msgs {
 			out, ok := r.FromZulip(msg.Stream(), msg.Topic, msg.SenderEmail, msg.SenderFullName, msg.Content)

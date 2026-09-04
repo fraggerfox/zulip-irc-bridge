@@ -22,6 +22,10 @@ import (
 // action is true for CTCP ACTION (/me) messages.
 type InboundHandler func(channel, nick, content string, action bool)
 
+// rejoinDelay is how long to wait before rejoining after a kick;
+// a variable so tests can shorten it.
+var rejoinDelay = 5 * time.Second
+
 type Client struct {
 	conn     *ircevent.Connection
 	channels []string
@@ -72,7 +76,7 @@ func New(cfg config.IRC, channels []string, onMessage InboundHandler, log *slog.
 		if len(e.Params) >= 2 && e.Params[1] == conn.CurrentNick() {
 			ch := e.Params[0]
 			log.Warn("kicked from channel, rejoining", "channel", ch)
-			time.AfterFunc(5*time.Second, func() { conn.Join(ch) })
+			time.AfterFunc(rejoinDelay, func() { conn.Join(ch) })
 		}
 	})
 	conn.AddCallback("PRIVMSG", func(e ircmsg.Message) {
