@@ -27,7 +27,7 @@
           version = "0.1.0"; # x-release-please-version
           src = ./.;
 
-          vendorHash = "sha256-oGc1Zx+FSQOj+bFSX0nEjpuNgzlhe9bu/bSRP5FNp7U=";
+          vendorHash = "sha256-nEdmMplOi9VuiGigPU6+B0ylhuMt8PHUtmZE9cPs2u0=";
 
           meta = {
             description = "Two-way bridge between Zulip streams and IRC channels";
