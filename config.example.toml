@@ -1,0 +1,46 @@
+# zulip-irc-bridge configuration
+#
+# Secrets can be given inline (*_file = false form), or — preferred — as
+# paths to files containing only the secret (works with sops-nix, agenix,
+# systemd LoadCredential). The *_file variant always wins if both are set.
+
+[zulip]
+site = "https://zulip.example.com"
+email = "irc-bot@zulip.example.com"
+# api_key = "..."
+api_key_file = "/run/secrets/zulip_irc_bot_key"
+
+[irc]
+server = "irc.libera.chat"
+port = 6697
+tls = true
+nick = "example_bridge"
+# realname defaults to nick
+# realname = "Zulip IRC bridge"
+
+[irc.sasl]
+# SASL PLAIN over TLS. Leave this section out to connect without SASL.
+enabled = true
+username = "example_bridge"
+# password = "..."
+password_file = "/run/secrets/irc_nickserv_password"
+
+# One [[mapping]] block per bridged channel/stream pair.
+[[mapping]]
+channel = "##example"
+stream = "irc-example"
+topic = "general chat"
+# direction: "both" (default), "irc_to_zulip", "zulip_to_irc"
+direction = "both"
+
+[bridge]
+# Prefix used to render IRC nicks in Zulip messages.
+# "{nick}" is substituted; default shown.
+zulip_message_format = "**{nick}**: {content}"
+# Format for Zulip messages relayed to IRC; {name} is the sender's
+# full name in Zulip.
+irc_message_format = "<{name}> {content}"
+# Ignore IRC messages from these nicks (other bots, services).
+ignore_nicks = []
+# Log level: DEBUG, INFO, WARNING, ERROR
+log_level = "INFO"

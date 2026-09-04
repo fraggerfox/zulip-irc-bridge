@@ -1,0 +1,5 @@
+/zulip-irc-bridge
+result
+result-*
+config.toml
+coverage.out
