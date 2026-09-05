@@ -24,7 +24,7 @@
       {
         packages.default = pkgs.buildGoModule.override { go = go; } {
           pname = "zulip-irc-bridge";
-          version = "0.1.0"; # x-release-please-version
+          version = "0.1.1"; # x-release-please-version
           src = ./.;
 
           vendorHash = "sha256-nEdmMplOi9VuiGigPU6+B0ylhuMt8PHUtmZE9cPs2u0=";
