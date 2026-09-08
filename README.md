@@ -39,6 +39,63 @@ zulip-irc-bridge -config config.toml -check   # validate config only
 
 See [config.example.toml](config.example.toml) for all settings.
 
+## NixOS module
+
+The flake exports a NixOS module that owns the systemd unit: config
+validation before every (re)start, secrets via systemd `LoadCredential`
+(sops-nix / agenix files can stay root-owned), readiness tied to the
+actual IRC connect (`Type=notify`), reconnect-safe restart pacing, and
+a `DynamicUser` sandbox.
+
+Add the flake input and import the module:
+
+```nix
+{
+  inputs.zulip-irc-bridge.url = "github:fraggerfox/zulip-irc-bridge";
+  inputs.zulip-irc-bridge.inputs.nixpkgs.follows = "nixpkgs";
+
+  # in your host's module list:
+  # zulip-irc-bridge.nixosModules.default
+}
+```
+
+Then configure the service:
+
+```nix
+services.zulip-irc-bridge = {
+  enable = true;
+
+  # exposed to the service at
+  # /run/credentials/zulip-irc-bridge.service/<name>, read as root
+  credentials.zulip_api_key = config.sops.secrets.zulip_api_key.path;
+
+  # rendered to TOML in the nix store — never put secrets here,
+  # point *_file settings at credential paths instead
+  settings = {
+    zulip = {
+      site = "https://zulip.example.com";
+      email = "irc-bot@zulip.example.com";
+      api_key_file = "/run/credentials/zulip-irc-bridge.service/zulip_api_key";
+    };
+    irc = {
+      server = "irc.libera.chat";
+      nick = "example_bridge";
+    };
+    mapping = [
+      {
+        channel = "##example";
+        stream = "irc-example";
+        topic = "general chat";
+      }
+    ];
+  };
+};
+```
+
+`settings` is free-form and mirrors [config.example.toml](config.example.toml);
+a broken config fails the deploy at `ExecStartPre` instead of taking a
+running bridge down.
+
 ## Development
 
 ```
