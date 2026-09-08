@@ -16,7 +16,7 @@ import (
 	"github.com/fraggerfox/zulip-irc-bridge/internal/config"
 )
 
-var version = "0.1.0" // x-release-please-version
+var version = "0.1.1" // x-release-please-version
 
 func main() {
 	os.Exit(run())
