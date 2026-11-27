@@ -33,7 +33,7 @@ jobs:
           ref: ${{ github.head_ref }}
           token: ${{ secrets.AUTOFIX_TOKEN || secrets.GITHUB_TOKEN }}
 
-      - uses: cachix/install-nix-action@v31
+      - uses: cachix/install-nix-action@v32
 
       - name: build, capturing the hash mismatch if any
         id: build
